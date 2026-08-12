@@ -16,8 +16,7 @@ int main() {
     cout << "Vector v3: ";
     for (int x : v3)
         cout << x << " ";
-    cout << endl << endl;
-
+    cout << endl << endl;      
 
     //========================================================
     // 2. push_back()
