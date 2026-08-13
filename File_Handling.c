@@ -8,7 +8,7 @@ void deleteData(unsigned int deleteId);
 int main()
 {
 
-    unsigned int choice, userId;
+    unsigned int choice, userId, result;
 
     while (1)
     {
@@ -20,6 +20,14 @@ int main()
 
         printf("\n\nEnter Your Choice: ");
         scanf("%u", &choice);
+
+        if (result != 1)
+        {
+            printf("Invalid input! Please enter a number.\n");
+
+            while (getchar() != '\n');
+            continue; 
+        }
 
         switch (choice)
         {
@@ -143,7 +151,7 @@ void update(unsigned int searchId)
         if (searchId == id)
         {
             printf("Enter New Name: \n");
-            getchar(); 
+            getchar();
             fgets(name, sizeof(name), stdin);
             name[strcspn(name, "\n")] = '\0';
             found = 1;
