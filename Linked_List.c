@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 struct StudentInfo
 {
@@ -12,6 +13,17 @@ struct StudentInfo
 };
 
 struct StudentInfo *syc = NULL;
+unsigned int choice, roll;
+
+int isNumber(const char *str) {
+    if(*str == '\0') return 0;
+    while (*str)
+    {
+        if(!isdigit(*str)) return 0;
+        str ++;
+    }
+    return 1;
+}
 
 void createStudents();
 void displayStudents();
@@ -21,8 +33,7 @@ void freeStudents();
 
 int main()
 {
-    int choice;
-    unsigned int roll;
+    char input[100];
 
     while(1)
     {
@@ -34,7 +45,20 @@ int main()
         printf("5. Exit\n");
 
         printf("Enter Choice : ");
-        scanf("%d",&choice);
+        
+        if (!fgets(input, sizeof(input), stdin)) {
+            printf("Invalid Error \n");
+            continue;
+        }
+        
+        input[strcspn(input, "\n")] = '\0';
+
+        if (!isNumber(input)) {
+            printf("Invalid input! Please enter a valid number. \n");
+            continue;
+        }
+
+        choice = (unsigned int)atoi(input);
 
         switch(choice)
         {
@@ -48,14 +72,30 @@ int main()
 
             case 3:
                 printf("Enter Roll Number to Update : ");
-                scanf("%u",&roll);
-                updateStudent(roll);
+                if(fgets(input, sizeof(input), stdin)) {
+                    input[strcspn(input, "\n")] = '\0';
+                    if(isNumber(input)){
+                        roll = (unsigned int)atoi(input);
+                        updateStudent(roll);
+                    }
+                    else {
+                        printf("Invalid ID! \n");
+                    }
+                }
                 break;
 
             case 4:
                 printf("Enter Roll Number to Delete : ");
-                scanf("%u",&roll);
-                deleteStudent(roll);
+                if(fgets(input, sizeof(input), stdin)) {
+                    input[strcspn(input, "\n")] = '\0';
+                    if(isNumber(input)){
+                        roll = (unsigned int)atoi(input);
+                        deleteStudent(roll);
+                    }
+                    else {
+                        printf("Invalid ID! \n");
+                    }
+                }
                 break;
 
             case 5:
@@ -72,9 +112,9 @@ void createStudents()
 {
     struct StudentInfo *student;
     struct StudentInfo *last;
+    char buffer[100];
 
     student = (struct StudentInfo *)malloc(sizeof(struct StudentInfo));
-
     if(student == NULL)
     {
         printf("Memory Allocation Failed.\n");
@@ -82,29 +122,31 @@ void createStudents()
     }
 
     printf("\nEnter Roll Number : ");
-    scanf("%u",&(*student).rollNo);
+    if(fgets(buffer, sizeof(buffer), stdin)) {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        (*student).rollNo = (unsigned int)atoi(buffer);
+    }
 
     printf("Enter Name : ");
-    scanf("%s",(*student).name);
+    if(fgets(buffer, sizeof(buffer), stdin)) {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        strcpy((*student).name, buffer);
+    }
 
     printf("Enter Email : ");
-    scanf("%s",(*student).email);
+    if(fgets(buffer, sizeof(buffer), stdin)) {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        strcpy((*student).email, buffer);
+    }
 
     (*student).next = NULL;
 
     if(syc == NULL)
-    {
         syc = student;
-    }
-    else
-    {
+    else {
         last = syc;
-
         while((*last).next != NULL)
-        {
             last = (*last).next;
-        }
-
         (*last).next = student;
     }
 
@@ -140,6 +182,7 @@ void displayStudents()
 void updateStudent(unsigned int searchRollNo)
 {
     struct StudentInfo *last;
+    char buffer[100];
 
     if(syc == NULL)
     {
@@ -154,10 +197,16 @@ void updateStudent(unsigned int searchRollNo)
         if((*last).rollNo == searchRollNo)
         {
             printf("\nEnter New Name : ");
-            scanf("%s",(*last).name);
+            if(fgets(buffer, sizeof(buffer), stdin)) {
+                buffer[strcspn(buffer, "\n")] = '\0';
+                strcpy((*last).name, buffer);
+            }
 
             printf("Enter New Email : ");
-            scanf("%s",(*last).email);
+            if(fgets(buffer, sizeof(buffer), stdin)) {
+                buffer[strcspn(buffer, "\n")] = '\0';
+                strcpy((*last).email, buffer);
+            }
 
             printf("\nStudent Updated Successfully.\n");
             return;

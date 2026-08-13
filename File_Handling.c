@@ -1,14 +1,31 @@
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 void create();
 void read();
 void update(unsigned int searchId);
 void deleteData(unsigned int deleteId);
 
+unsigned int choice, userId;
+
+int isNumber(const char *str)
+{
+    if (*str == '\0')
+        return 0;
+    while (*str)
+    {
+        if (!isdigit(*str))
+            return 0;
+        str++;
+    }
+    return 1;
+}
+
 int main()
 {
-
-    unsigned int choice, userId, result;
+    char input[100];
 
     while (1)
     {
@@ -19,15 +36,22 @@ int main()
         printf("\n5. Exit");
 
         printf("\n\nEnter Your Choice: ");
-        scanf("%u", &choice);
 
-        if (result != 1)
+        if (!fgets(input, sizeof(input), stdin))
         {
-            printf("Invalid input! Please enter a number.\n");
-
-            while (getchar() != '\n');
-            continue; 
+            printf("Input error!\n");
+            continue;
         }
+
+        input[strcspn(input, "\n")] = '\0';
+
+        if (!isNumber(input))
+        {
+            printf("Invalid input! Please enter a valid number.\n");
+            continue;
+        }
+
+        choice = (unsigned int)atoi(input);
 
         switch (choice)
         {
@@ -41,14 +65,36 @@ int main()
 
         case 3:
             printf("Enter the ID to Update: ");
-            scanf("%u", &userId);
-            update(userId);
+            if (fgets(input, sizeof(input), stdin))
+            {
+                input[strcspn(input, "\n")] = '\0';
+                if (isNumber(input))
+                {
+                    userId = (unsigned int)atoi(input);
+                    update(userId);
+                }
+                else
+                {
+                    printf("Invalid ID!\n");
+                }
+            }
             break;
 
         case 4:
             printf("Enter the ID to Delete: ");
-            scanf("%u", &userId);
-            deleteData(userId);
+            if (fgets(input, sizeof(input), stdin))
+            {
+                input[strcspn(input, "\n")] = '\0';
+                if (isNumber(input))
+                {
+                    userId = (unsigned int)atoi(input);
+                    deleteData(userId);
+                }
+                else
+                {
+                    printf("Invalid ID!\n");
+                }
+            }
             break;
 
         case 5:
@@ -64,6 +110,50 @@ int main()
 void create()
 {
     FILE *fp;
+    char buffer[100];
+    unsigned int id;
+    char name[50];
+
+    printf("Enter Id: \n");
+    if (fgets(buffer, sizeof(buffer), stdin))
+    {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        id = (unsigned int)atoi(buffer);
+    }
+    else {
+        printf("Invalid! ID\n");
+    }
+
+    fp = fopen("data.txt", "r");
+    if (fp != NULL)
+    {
+        int duplicate = 0;
+        unsigned int existingID;
+        char existingName[50];
+        while (fscanf(fp, "ID: %u, Name: %s\n", &existingID, existingName) != EOF)
+        {
+            if (existingID == id)
+            {
+                duplicate = 1;
+                break;
+            }
+        }
+        fclose(fp);
+
+        if (duplicate)
+        {
+            printf("ID %u already exists! Please select a different one.\n", id);
+            return;
+        }
+    }
+
+    printf("Enter Your Name: \n");
+    if (fgets(buffer, sizeof(buffer), stdin))
+    {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        strcpy(name, buffer);
+    }
+
     fp = fopen("data.txt", "a");
 
     if (fp == NULL)
@@ -72,17 +162,10 @@ void create()
         return;
     }
 
-    unsigned int id;
-    char name[50];
-
-    printf("Enter Id: \n");
-    scanf("%u", &id);
-
-    printf("Enter Your Name: \n");
-    scanf("%s", name);
-
     fprintf(fp, "ID: %u, Name: %s\n", id, name);
     fclose(fp);
+
+    printf("User Created Successfully!!!\n\n");
 }
 
 void read()
@@ -101,8 +184,8 @@ void read()
 
     printf("-------RECORD-------\n");
 
-    fseek(fp, 0, SEEK_END); // move to end of file
-    long size = ftell(fp);  // get position (file size)
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
 
     if (size == 0)
     {
@@ -111,7 +194,7 @@ void read()
         return;
     }
 
-    rewind(fp); // reset pointer to start
+    rewind(fp);
 
     while (fscanf(fp, "ID: %u, Name: %s\n", &id, name) != EOF)
     {
@@ -151,9 +234,10 @@ void update(unsigned int searchId)
         if (searchId == id)
         {
             printf("Enter New Name: \n");
-            getchar();
-            fgets(name, sizeof(name), stdin);
-            name[strcspn(name, "\n")] = '\0';
+            if (fgets(name, sizeof(name), stdin))
+            {
+                name[strcspn(name, "\n")] = '\0';
+            }
             found = 1;
         }
 
