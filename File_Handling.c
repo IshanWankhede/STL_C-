@@ -118,10 +118,15 @@ void create()
     if (fgets(buffer, sizeof(buffer), stdin))
     {
         buffer[strcspn(buffer, "\n")] = '\0';
-        id = (unsigned int)atoi(buffer);
-    }
-    else {
-        printf("Invalid! ID\n");
+        if (isNumber(buffer))
+        {
+            id = (unsigned int)atoi(buffer);
+        }
+        else
+        {
+            printf("Invalid ID!\n");
+            return;
+        }
     }
 
     fp = fopen("data.txt", "r");

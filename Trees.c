@@ -3,102 +3,285 @@
 
 struct TreeNode
 {
-    int data;
+    unsigned int data;
 
     struct TreeNode *left;
     struct TreeNode *right;
 };
 
-struct TreeNode* createNode(int value);
+struct TreeNode *root = NULL;
 
-void preorder(struct TreeNode *root);
-void inorder(struct TreeNode *root);
-void postorder(struct TreeNode *root);
+
+/* Queue */
+struct TreeNode *queue[100];
+
+int front = -1;
+int rear = -1;
+
+
+/* Queue Functions */
+void enqueue(struct TreeNode *node);
+struct TreeNode *dequeue();
+
+
+/* Tree Functions */
+void addNode(unsigned int data);
+void preorder(struct TreeNode *node);
+void inorder(struct TreeNode *node);
+void postorder(struct TreeNode *node);
+
 
 int main()
 {
-    struct TreeNode *root;
+    int choice;
+    unsigned int data;
 
-    root = createNode(10);
+    while(1)
+    {
+        printf("\n========== BINARY TREE ==========\n");
 
-    (*root).left = createNode(20);
-    (*root).right = createNode(30);
+        printf("1. Add Node\n");
+        printf("2. Preorder\n");
+        printf("3. Inorder\n");
+        printf("4. Postorder\n");
+        printf("5. Exit\n");
 
-    (*(*root).left).left = createNode(40);
-    (*(*root).left).right = createNode(50);
+        printf("\nEnter Choice : ");
+        scanf("%d", &choice);
 
-    (*(*root).right).right = createNode(60);
+        switch(choice)
+        {
+            case 1:
 
-    printf("\nPreorder : ");
-    preorder(root);
+                printf("Enter Data : ");
+                scanf("%u", &data);
 
-    printf("\nInorder : ");
-    inorder(root);
+                addNode(data);
 
-    printf("\nPostorder : ");
-    postorder(root);
+                break;
 
-    return 0;
+
+            case 2:
+
+                printf("\nPreorder : ");
+
+                preorder(root);
+
+                printf("\n");
+
+                break;
+
+
+            case 3:
+
+                printf("\nInorder : ");
+
+                inorder(root);
+
+                printf("\n");
+
+                break;
+
+
+            case 4:
+
+                printf("\nPostorder : ");
+
+                postorder(root);
+
+                printf("\n");
+
+                break;
+
+
+            case 5:
+
+                return 0;
+
+
+            default:
+
+                printf("\nInvalid Choice.\n");
+        }
+    }
 }
 
-struct TreeNode* createNode(int value)
+
+/* ================= QUEUE ================= */
+
+void enqueue(struct TreeNode *node)
 {
-    struct TreeNode *node;
-
-    node = (struct TreeNode *)malloc(sizeof(struct TreeNode));
-
-    if(node == NULL)
+    if(rear == 99)
     {
-        printf("Memory Allocation Failed.\n");
+        printf("\nQueue Overflow.\n");
+        return;
+    }
+
+    if(front == -1)
+    {
+        front = 0;
+    }
+
+    rear++;
+
+    queue[rear] = node;
+}
+
+
+struct TreeNode *dequeue()
+{
+    struct TreeNode *temp;
+
+    if(front == -1 || front > rear)
+    {
         return NULL;
     }
 
-    (*node).data = value;
+    temp = queue[front];
+
+    front++;
+
+    return temp;
+}
+
+
+/* ================= ADD NODE ================= */
+
+void addNode(unsigned int data)
+{
+    struct TreeNode *node;
+    struct TreeNode *temp;
+
+    int found = 0;
+
+
+    /* Create new node */
+
+    node = (struct TreeNode *)malloc(sizeof(struct TreeNode));
+
+
+    if(node == NULL)
+    {
+        printf("\nMemory Allocation Failed.\n");
+        return;
+    }
+
+
+    (*node).data = data;
 
     (*node).left = NULL;
+
     (*node).right = NULL;
 
-    return node;
+
+    /* If tree is empty */
+
+    if(root == NULL)
+    {
+        root = node;
+
+        printf("\nNode Added Successfully.\n");
+
+        return;
+    }
+
+
+    /* Start Queue */
+
+    front = -1;
+    rear = -1;
+
+    enqueue(root);
+
+
+    /* Find first empty position */
+
+    while(found == 0)
+    {
+        temp = dequeue();
+
+
+        /* Check LEFT */
+
+        if((*temp).left == NULL)
+        {
+            (*temp).left = node;
+
+            found = 1;
+        }
+
+        else
+        {
+            enqueue((*temp).left);
+
+
+            /* Check RIGHT */
+
+            if((*temp).right == NULL)
+            {
+                (*temp).right = node;
+
+                found = 1;
+            }
+
+            else
+            {
+                enqueue((*temp).right);
+            }
+        }
+    }
+
+
+    printf("\nNode Added Successfully.\n");
 }
 
-void preorder(struct TreeNode *root)
+
+/* ================= PREORDER ================= */
+
+void preorder(struct TreeNode *node)
 {
-    if(root == NULL)
+    if(node == NULL)
     {
         return;
     }
 
-    printf("%d ",(*root).data);
+    printf("%u ", (*node).data);
 
-    preorder((*root).left);
+    preorder((*node).left);
 
-    preorder((*root).right);
+    preorder((*node).right);
 }
 
-void inorder(struct TreeNode *root)
+
+/* ================= INORDER ================= */
+
+void inorder(struct TreeNode *node)
 {
-    if(root == NULL)
+    if(node == NULL)
     {
         return;
     }
 
-    inorder((*root).left);
+    inorder((*node).left);
 
-    printf("%d ",(*root).data);
+    printf("%u ", (*node).data);
 
-    inorder((*root).right);
+    inorder((*node).right);
 }
 
-void postorder(struct TreeNode *root)
+
+/* ================= POSTORDER ================= */
+
+void postorder(struct TreeNode *node)
 {
-    if(root == NULL)
+    if(node == NULL)
     {
         return;
     }
 
-    postorder((*root).left);
+    postorder((*node).left);
 
-    postorder((*root).right);
+    postorder((*node).right);
 
-    printf("%d ",(*root).data);
+    printf("%u ", (*node).data);
 }

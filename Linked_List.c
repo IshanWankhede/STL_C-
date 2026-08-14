@@ -124,7 +124,13 @@ void createStudents()
     printf("\nEnter Roll Number : ");
     if(fgets(buffer, sizeof(buffer), stdin)) {
         buffer[strcspn(buffer, "\n")] = '\0';
-        (*student).rollNo = (unsigned int)atoi(buffer);
+        if (isNumber(buffer)) {
+            (*student).rollNo = (unsigned int)atoi(buffer);
+        }
+        else {
+            printf("Invalid Roll No!");
+            return;
+        }
     }
 
     printf("Enter Name : ");
@@ -171,7 +177,7 @@ void displayStudents()
     {
         printf("\nRoll Number : %u",(*last).rollNo);
         printf("\nName        : %s",(*last).name);
-        printf("\nEmail       : %s",(*last).email);
+        printf("\nEmail       : %s\n",(*last).email);
 
         last = (*last).next;
     }
