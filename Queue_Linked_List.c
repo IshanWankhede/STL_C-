@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 struct Queue
 {
@@ -10,6 +12,22 @@ struct Queue
 struct Queue *front = NULL;
 struct Queue *rear = NULL;
 
+int isNumber(const char *str)
+{
+    if(*str == '\0')
+        return 0;
+
+    while(*str)
+    {
+        if(!isdigit(*str))
+            return 0;
+
+        str++;
+    }
+
+    return 1;
+}
+
 void enqueue();
 void dequeue();
 void display();
@@ -17,6 +35,7 @@ void freeQueue();
 
 int main()
 {
+    char input[100];
     int choice;
 
     while(1)
@@ -28,7 +47,22 @@ int main()
         printf("4. Exit\n");
 
         printf("Enter Choice : ");
-        scanf("%d",&choice);
+
+        if(!fgets(input, sizeof(input), stdin))
+        {
+            printf("Invalid Error.\n");
+            continue;
+        }
+
+        input[strcspn(input, "\n")] = '\0';
+
+        if(!isNumber(input))
+        {
+            printf("Invalid input! Please enter a valid number.\n");
+            continue;
+        }
+
+        choice = atoi(input);
 
         switch(choice)
         {
@@ -49,7 +83,7 @@ int main()
                 return 0;
 
             default:
-                printf("Invalid Choice\n");
+                printf("Invalid Choice! Please select 1-4.\n");
         }
     }
 }
@@ -57,6 +91,7 @@ int main()
 void enqueue()
 {
     struct Queue *node;
+    char input[100];
 
     node = (struct Queue *)malloc(sizeof(struct Queue));
 
@@ -67,7 +102,24 @@ void enqueue()
     }
 
     printf("Enter Data : ");
-    scanf("%d",&(*node).data);
+
+    if(!fgets(input, sizeof(input), stdin))
+    {
+        printf("Invalid Error.\n");
+        free(node);
+        return;
+    }
+
+    input[strcspn(input, "\n")] = '\0';
+
+    if(!isNumber(input))
+    {
+        printf("Invalid Data! Please enter a valid number.\n");
+        free(node);
+        return;
+    }
+
+    (*node).data = atoi(input);
 
     (*node).next = NULL;
 
@@ -97,7 +149,7 @@ void dequeue()
 
     temp = front;
 
-    printf("Deleted Element : %d\n",(*front).data);
+    printf("Deleted Element : %d\n", (*front).data);
 
     front = (*front).next;
 
@@ -125,7 +177,7 @@ void display()
 
     while(temp != NULL)
     {
-        printf("%d ",(*temp).data);
+        printf("%d ", (*temp).data);
         temp = (*temp).next;
     }
 

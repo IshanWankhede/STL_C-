@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 struct Stack
 {
@@ -9,6 +11,22 @@ struct Stack
 
 struct Stack *top = NULL;
 
+int isNumber(const char *str)
+{
+    if(*str == '\0')
+        return 0;
+
+    while(*str)
+    {
+        if(!isdigit(*str))
+            return 0;
+
+        str++;
+    }
+
+    return 1;
+}
+
 void push();
 void pop();
 void peek();
@@ -17,6 +35,7 @@ void freeStack();
 
 int main()
 {
+    char input[100];
     int choice;
 
     while(1)
@@ -29,7 +48,22 @@ int main()
         printf("5. Exit\n");
 
         printf("Enter Choice : ");
-        scanf("%d",&choice);
+
+        if(!fgets(input, sizeof(input), stdin))
+        {
+            printf("Invalid Error.\n");
+            continue;
+        }
+
+        input[strcspn(input, "\n")] = '\0';
+
+        if(!isNumber(input))
+        {
+            printf("Invalid input! Please enter a valid number.\n");
+            continue;
+        }
+
+        choice = atoi(input);
 
         switch(choice)
         {
@@ -54,7 +88,7 @@ int main()
                 return 0;
 
             default:
-                printf("Invalid Choice\n");
+                printf("Invalid Choice! Please select 1-5.\n");
         }
     }
 }
@@ -62,6 +96,7 @@ int main()
 void push()
 {
     struct Stack *node;
+    char input[100];
 
     node = (struct Stack *)malloc(sizeof(struct Stack));
 
@@ -72,7 +107,24 @@ void push()
     }
 
     printf("Enter Data : ");
-    scanf("%d",&(*node).data);
+
+    if(!fgets(input, sizeof(input), stdin))
+    {
+        printf("Invalid Error.\n");
+        free(node);
+        return;
+    }
+
+    input[strcspn(input, "\n")] = '\0';
+
+    if(!isNumber(input))
+    {
+        printf("Invalid Data! Please enter a valid number.\n");
+        free(node);
+        return;
+    }
+
+    (*node).data = atoi(input);
 
     (*node).next = top;
 
@@ -93,7 +145,7 @@ void pop()
 
     temp = top;
 
-    printf("Deleted Element : %d\n",(*top).data);
+    printf("Deleted Element : %d\n", (*top).data);
 
     top = (*top).next;
 
@@ -108,7 +160,7 @@ void peek()
         return;
     }
 
-    printf("Top Element : %d\n",(*top).data);
+    printf("Top Element : %d\n", (*top).data);
 }
 
 void display()
@@ -127,7 +179,7 @@ void display()
 
     while(temp != NULL)
     {
-        printf("%d\n",(*temp).data);
+        printf("%d\n", (*temp).data);
         temp = (*temp).next;
     }
 }
