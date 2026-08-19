@@ -129,6 +129,7 @@ void createStudents()
         }
         else {
             printf("Invalid Roll No!");
+            free(student);
             return;
         }
     }
