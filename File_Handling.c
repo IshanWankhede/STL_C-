@@ -23,6 +23,19 @@ int isNumber(const char *str)
     return 1;
 }
 
+int isValidName(const char *str)
+{
+    if (*str == '\0') return 0; 
+
+    while (*str)
+    {
+        if (!isalpha(*str) && *str != ' ') 
+            return 0;
+        str++;
+    }
+    return 1;
+}
+
 int main()
 {
     char input[100];
