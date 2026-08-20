@@ -8,7 +8,6 @@ struct StudentInfo
     unsigned int rollNo;
     char name[50];
     char email[50];
-
     struct StudentInfo *next;
 };
 
@@ -17,12 +16,24 @@ unsigned int choice, roll;
 
 int isNumber(const char *str) {
     if(*str == '\0') return 0;
-    while (*str)
-    {
+    while (*str) {
         if(!isdigit(*str)) return 0;
-        str ++;
+        str++;
     }
     return 1;
+}
+
+int isValidName(const char *str) {
+    if(*str == '\0') return 0;
+    while (*str) {
+        if(!isalpha(*str) && *str != ' ') return 0; 
+        str++;
+    }
+    return 1;
+}
+
+int isValidEmail(const char *str) {
+    return (strchr(str, '@') && strchr(str, '.'));
 }
 
 void createStudents();
@@ -71,31 +82,35 @@ int main()
                 break;
 
             case 3:
-                printf("Enter Roll Number to Update : ");
-                if(fgets(input, sizeof(input), stdin)) {
-                    input[strcspn(input, "\n")] = '\0';
-                    if(isNumber(input)){
-                        roll = (unsigned int)atoi(input);
-                        updateStudent(roll);
+                do {
+                    printf("Enter Roll Number to Update : ");
+                    if(fgets(input, sizeof(input), stdin)) {
+                        input[strcspn(input, "\n")] = '\0';
+                        if(isNumber(input)){
+                            roll = (unsigned int)atoi(input);
+                            updateStudent(roll);
+                            break;
+                        } else {
+                            printf("Invalid ID! Please try again.\n");
+                        }
                     }
-                    else {
-                        printf("Invalid ID! \n");
-                    }
-                }
+                } while(1);
                 break;
 
             case 4:
-                printf("Enter Roll Number to Delete : ");
-                if(fgets(input, sizeof(input), stdin)) {
-                    input[strcspn(input, "\n")] = '\0';
-                    if(isNumber(input)){
-                        roll = (unsigned int)atoi(input);
-                        deleteStudent(roll);
+                do {
+                    printf("Enter Roll Number to Delete : ");
+                    if(fgets(input, sizeof(input), stdin)) {
+                        input[strcspn(input, "\n")] = '\0';
+                        if(isNumber(input)){
+                            roll = (unsigned int)atoi(input);
+                            deleteStudent(roll);
+                            break;
+                        } else {
+                            printf("Invalid ID! Please try again.\n");
+                        }
                     }
-                    else {
-                        printf("Invalid ID! \n");
-                    }
-                }
+                } while(1);
                 break;
 
             case 5:
@@ -121,30 +136,44 @@ void createStudents()
         return;
     }
 
-    printf("\nEnter Roll Number : ");
-    if(fgets(buffer, sizeof(buffer), stdin)) {
-        buffer[strcspn(buffer, "\n")] = '\0';
-        if (isNumber(buffer)) {
-            (*student).rollNo = (unsigned int)atoi(buffer);
+    do {
+        printf("\nEnter Roll Number : ");
+        if(fgets(buffer, sizeof(buffer), stdin)) {
+            buffer[strcspn(buffer, "\n")] = '\0';
+            if (isNumber(buffer)) {
+                (*student).rollNo = (unsigned int)atoi(buffer);
+                break;
+            } else {
+                printf("Invalid Roll No! Digits only.\n");
+            }
         }
-        else {
-            printf("Invalid Roll No!");
-            free(student);
-            return;
+    } while(1);
+
+    do {
+        printf("Enter Name : ");
+        if(fgets(buffer, sizeof(buffer), stdin)) {
+            buffer[strcspn(buffer, "\n")] = '\0';
+            if(isValidName(buffer)) {
+                strcpy((*student).name, buffer);
+                break;
+            } else {
+                printf("Invalid Name! Only letters and spaces allowed.\n");
+            }
         }
-    }
+    } while(1);
 
-    printf("Enter Name : ");
-    if(fgets(buffer, sizeof(buffer), stdin)) {
-        buffer[strcspn(buffer, "\n")] = '\0';
-        strcpy((*student).name, buffer);
-    }
-
-    printf("Enter Email : ");
-    if(fgets(buffer, sizeof(buffer), stdin)) {
-        buffer[strcspn(buffer, "\n")] = '\0';
-        strcpy((*student).email, buffer);
-    }
+    do {
+        printf("Enter Email : ");
+        if(fgets(buffer, sizeof(buffer), stdin)) {
+            buffer[strcspn(buffer, "\n")] = '\0';
+            if(isValidEmail(buffer)) {
+                strcpy((*student).email, buffer);
+                break;
+            } else {
+                printf("Invalid Email! Must contain '@' and '.'\n");
+            }
+        }
+    } while(1);
 
     (*student).next = NULL;
 
@@ -176,9 +205,9 @@ void displayStudents()
 
     while(last != NULL)
     {
-        printf("\nRoll Number : %u",(*last).rollNo);
-        printf("\nName        : %s",(*last).name);
-        printf("\nEmail       : %s\n",(*last).email);
+        printf("\nRoll Number : %u", (*last).rollNo);
+        printf("\nName        : %s", (*last).name);
+        printf("\nEmail       : %s\n", (*last).email);
 
         last = (*last).next;
     }
@@ -203,17 +232,31 @@ void updateStudent(unsigned int searchRollNo)
     {
         if((*last).rollNo == searchRollNo)
         {
-            printf("\nEnter New Name : ");
-            if(fgets(buffer, sizeof(buffer), stdin)) {
-                buffer[strcspn(buffer, "\n")] = '\0';
-                strcpy((*last).name, buffer);
-            }
+            do {
+                printf("\nEnter New Name : ");
+                if(fgets(buffer, sizeof(buffer), stdin)) {
+                    buffer[strcspn(buffer, "\n")] = '\0';
+                    if(isValidName(buffer)) {
+                        strcpy((*last).name, buffer);
+                        break;
+                    } else {
+                        printf("Invalid Name! Only letters and spaces allowed.\n");
+                    }
+                }
+            } while(1);
 
-            printf("Enter New Email : ");
-            if(fgets(buffer, sizeof(buffer), stdin)) {
-                buffer[strcspn(buffer, "\n")] = '\0';
-                strcpy((*last).email, buffer);
-            }
+            do {
+                printf("Enter New Email : ");
+                if(fgets(buffer, sizeof(buffer), stdin)) {
+                    buffer[strcspn(buffer, "\n")] = '\0';
+                    if(isValidEmail(buffer)) {
+                        strcpy((*last).email, buffer);
+                        break;
+                    } else {
+                        printf("Invalid Email! Must contain '@' and '.'\n");
+                    }
+                }
+            } while(1);
 
             printf("\nStudent Updated Successfully.\n");
             return;
@@ -244,13 +287,9 @@ void deleteStudent(unsigned int deleteRollNo)
         if((*current).rollNo == deleteRollNo)
         {
             if(previous == NULL)
-            {
                 syc = (*current).next;
-            }
             else
-            {
                 (*previous).next = (*current).next;
-            }
 
             free(current);
 
