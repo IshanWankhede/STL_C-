@@ -11,7 +11,7 @@ struct StudentInfo
     struct StudentInfo *next;
 };
 
-struct StudentInfo *syc = NULL;
+struct StudentInfo *head = NULL;
 unsigned int choice, roll;
 
 int isNumber(const char *str) {
@@ -33,8 +33,21 @@ int isValidName(const char *str) {
 }
 
 int isValidEmail(const char *str) {
-    return (strchr(str, '@') && strchr(str, '.'));
+    char *at = strchr(str, '@');
+    if (!at) return 0; 
+
+    char *dot = strchr(at, '.');
+    if (!dot) return 0; 
+
+    if (at == str) return 0;
+
+    if (dot == at + 1) return 0;
+
+    if (*(dot + 1) == '\0') return 0;
+
+    return 1; 
 }
+
 
 void createStudents();
 void displayStudents();
@@ -170,17 +183,17 @@ void createStudents()
                 strcpy((*student).email, buffer);
                 break;
             } else {
-                printf("Invalid Email! Must contain '@' and '.'\n");
+                printf("Invalid Email!\n");
             }
         }
     } while(1);
 
     (*student).next = NULL;
 
-    if(syc == NULL)
-        syc = student;
+    if(head == NULL)
+        head = student;
     else {
-        last = syc;
+        last = head;
         while((*last).next != NULL)
             last = (*last).next;
         (*last).next = student;
@@ -193,13 +206,13 @@ void displayStudents()
 {
     struct StudentInfo *last;
 
-    if(syc == NULL)
+    if(head == NULL)
     {
         printf("\nNo Student Found.\n");
         return;
     }
 
-    last = syc;
+    last = head;
 
     printf("\n========== STUDENT LIST ==========\n");
 
@@ -220,13 +233,13 @@ void updateStudent(unsigned int searchRollNo)
     struct StudentInfo *last;
     char buffer[100];
 
-    if(syc == NULL)
+    if(head == NULL)
     {
         printf("\nNo Student Found.\n");
         return;
     }
 
-    last = syc;
+    last = head;
 
     while(last != NULL)
     {
@@ -273,13 +286,13 @@ void deleteStudent(unsigned int deleteRollNo)
     struct StudentInfo *current;
     struct StudentInfo *previous;
 
-    if(syc == NULL)
+    if(head == NULL)
     {
         printf("\nNo Student Found.\n");
         return;
     }
 
-    current = syc;
+    current = head;
     previous = NULL;
 
     while(current != NULL)
@@ -287,7 +300,7 @@ void deleteStudent(unsigned int deleteRollNo)
         if((*current).rollNo == deleteRollNo)
         {
             if(previous == NULL)
-                syc = (*current).next;
+                head = (*current).next;
             else
                 (*previous).next = (*current).next;
 
@@ -306,7 +319,7 @@ void deleteStudent(unsigned int deleteRollNo)
 
 void freeStudents()
 {
-    struct StudentInfo *current = syc;
+    struct StudentInfo *current = head;
     struct StudentInfo *next;
 
     while(current != NULL)
@@ -316,7 +329,7 @@ void freeStudents()
         current = next;
     }
 
-    syc = NULL;
+    head = NULL;
 
     printf("\nAll Student Records Free From Memory.\n");
 }
