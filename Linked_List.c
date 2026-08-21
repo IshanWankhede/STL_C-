@@ -33,11 +33,14 @@ int isValidName(const char *str) {
 }
 
 int isValidEmail(const char *str) {
+
     char *at = strchr(str, '@');
-    if (!at) return 0; 
+    if (!at) return 0;
+
+    if (strchr(at + 1, '@')) return 0;
 
     char *dot = strchr(at, '.');
-    if (!dot) return 0; 
+    if (!dot) return 0;
 
     if (at == str) return 0;
 
@@ -45,9 +48,43 @@ int isValidEmail(const char *str) {
 
     if (*(dot + 1) == '\0') return 0;
 
-    return 1; 
+    size_t domainLen = dot - (at + 1);
+    char domain[20];
+    if (domainLen >= sizeof(domain)) return 0;
+    strncpy(domain, at + 1, domainLen);
+    domain[domainLen] = '\0';
+
+    if (strcmp(domain, "gmail") != 0 && strcmp(domain, "vit") != 0) {
+        return 0;
+    }
+
+    if (strcmp(dot + 1, "com") == 0 ||
+        strcmp(dot + 1, "in") == 0  ||
+        strcmp(dot + 1, "edu") == 0) {
+        return 1;
+    }
+
+    return 0;
 }
 
+/*
+int isValidEmail(const char *str) {
+    regex_t regex;
+    int result;
+
+    const char *pattern = "^[A-Za-z0-9._%+-]+@(gmail|vit)\\.(com|in|edu)$";
+
+    result = regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB);
+    if (result != 0) {
+        return 0; // regex compilation failed
+    }
+
+    result = regexec(&regex, str, 0, NULL, 0);
+    regfree(&regex);
+
+    return result == 0; 
+}
+*/
 
 void createStudents();
 void displayStudents();
