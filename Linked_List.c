@@ -67,24 +67,6 @@ int isValidEmail(const char *str) {
     return 0;
 }
 
-/*
-int isValidEmail(const char *str) {
-    regex_t regex;
-    int result;
-
-    const char *pattern = "^[A-Za-z0-9._%+-]+@(gmail|vit)\\.(com|in|edu)$";
-
-    result = regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB);
-    if (result != 0) {
-        return 0; // regex compilation failed
-    }
-
-    result = regexec(&regex, str, 0, NULL, 0);
-    regfree(&regex);
-
-    return result == 0; 
-}
-*/
 
 void createStudents();
 void displayStudents();

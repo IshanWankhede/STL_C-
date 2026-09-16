@@ -47,9 +47,11 @@ int isValidUnsignedInt(const char *str)
         return 0;
 
     errno = 0;
-
+    printf("%d %lu\n", errno, ULONG_MAX);
+    
     value = strtoul(str, &endPtr, 10);
 
+    printf("%d %d\n", errno, ERANGE);
    
     if (errno == ERANGE || value > UINT_MAX)
         return 0;
