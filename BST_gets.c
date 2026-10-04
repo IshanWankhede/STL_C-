@@ -161,32 +161,7 @@ struct TreeNode *createNode(unsigned int *data)
 
 
 /* =========================
-   SEARCH NODE
-   ========================= */
-
-struct TreeNode *findNode(struct TreeNode *node, unsigned int *data)
-{
-    struct TreeNode *result;
-
-    if (node == NULL)
-        return NULL;
-
-    if ((*node).data == *data)
-        return node;
-
-    result = findNode((*node).left, data);
-
-    if (result != NULL)
-        return result;
-
-    return findNode((*node).right, data);
-}
-
-
-/* =========================
-   ADD NODE
-   Binary Tree insertion
-   using Level Order
+   BST INSERTION
    ========================= */
 
 void addNode(unsigned int *data)
@@ -202,39 +177,73 @@ void addNode(unsigned int *data)
     if (root == NULL)
     {
         root = newNode;
+
         printf("Node added successfully.\n");
+
         return;
     }
 
-    resetQueue();
-    enqueue(&root);
+    current = root;
 
-    while (!isQueueEmpty())
+    while (1)
     {
-        current = dequeue();
-
-        if ((*current).left == NULL)
+        if (*data == (*current).data)
         {
-            (*current).left = newNode;
-            printf("Node added successfully.\n");
+            printf("Duplicate value! Node not added.\n");
+
+            free(newNode);
+
             return;
+        }
+
+        if (*data < (*current).data)
+        {
+            if ((*current).left == NULL)
+            {
+                (*current).left = newNode;
+
+                printf("Node added successfully.\n");
+
+                return;
+            }
+
+            current = (*current).left;
         }
         else
         {
-            enqueue(&((*current).left));
-        }
+            if ((*current).right == NULL)
+            {
+                (*current).right = newNode;
 
-        if ((*current).right == NULL)
-        {
-            (*current).right = newNode;
-            printf("Node added successfully.\n");
-            return;
-        }
-        else
-        {
-            enqueue(&((*current).right));
+                printf("Node added successfully.\n");
+
+                return;
+            }
+
+            current = (*current).right;
         }
     }
+}
+
+
+/* =========================
+   BST SEARCH
+   ========================= */
+
+struct TreeNode *findNode(
+    struct TreeNode *node,
+    unsigned int *data)
+{
+    if (node == NULL)
+        return NULL;
+
+    if (*data == (*node).data)
+        return node;
+
+    if (*data < (*node).data)
+        return findNode((*node).left, data);
+
+    return findNode((*node).right, data);
 }
 
 
@@ -338,144 +347,152 @@ void displayTree()
 
 
 /* =========================
-   UPDATE NODE
+   FIND MINIMUM NODE
    ========================= */
 
-void updateNode(unsigned int *oldData, unsigned int *newData)
+struct TreeNode *findMinNode(struct TreeNode *node)
 {
-    struct TreeNode *node;
+    struct TreeNode *current = node;
 
-    node = findNode(root, oldData);
+    while ((*current).left != NULL)
+    {
+        current = (*current).left;
+    }
+
+    return current;
+}
+
+
+/* =========================
+   BST DELETE
+   ========================= */
+
+struct TreeNode *deleteNodeRecursive(
+    struct TreeNode *node,
+    unsigned int *data)
+{
+    struct TreeNode *successor;
 
     if (node == NULL)
-    {
-        printf("Node not found!\n");
-        return;
-    }
-
-    (*node).data = *newData;
-
-    printf("Node updated successfully.\n");
-}
-
-
-/* =========================
-   FIND DEEPEST NODE
-   ========================= */
-
-struct TreeNode *findDeepestNode()
-{
-    struct TreeNode *current;
-    struct TreeNode *deepest = NULL;
-
-    if (root == NULL)
         return NULL;
 
-    resetQueue();
-
-    enqueue(&root);
-
-    while (!isQueueEmpty())
+    if (*data < (*node).data)
     {
-        current = dequeue();
-
-        deepest = current;
-
-        if ((*current).left != NULL)
-            enqueue(&((*current).left));
-
-        if ((*current).right != NULL)
-            enqueue(&((*current).right));
+        (*node).left =
+            deleteNodeRecursive((*node).left, data);
     }
-
-    return deepest;
-}
-
-
-/* =========================
-   DELETE DEEPEST NODE
-   ========================= */
-
-void deleteDeepestNode(struct TreeNode *deepest)
-{
-    struct TreeNode *current;
-
-    if (root == NULL || deepest == NULL)
-        return;
-
-    if (root == deepest)
+    else if (*data > (*node).data)
     {
-        free(root);
-        root = NULL;
-        return;
+        (*node).right =
+            deleteNodeRecursive((*node).right, data);
     }
-
-    resetQueue();
-
-    enqueue(&root);
-
-    while (!isQueueEmpty())
+    else
     {
-        current = dequeue();
+        /* Case 1: No child */
 
-        if ((*current).left != NULL)
+        if ((*node).left == NULL &&
+            (*node).right == NULL)
         {
-            if ((*current).left == deepest)
-            {
-                free((*current).left);
-                (*current).left = NULL;
-                return;
-            }
+            free(node);
 
-            enqueue(&((*current).left));
+            return NULL;
         }
 
-        if ((*current).right != NULL)
-        {
-            if ((*current).right == deepest)
-            {
-                free((*current).right);
-                (*current).right = NULL;
-                return;
-            }
 
-            enqueue(&((*current).right));
+        /* Case 2: Only right child */
+
+        if ((*node).left == NULL)
+        {
+            struct TreeNode *temp = (*node).right;
+
+            free(node);
+
+            return temp;
         }
+
+
+        /* Case 3: Only left child */
+
+        if ((*node).right == NULL)
+        {
+            struct TreeNode *temp = (*node).left;
+
+            free(node);
+
+            return temp;
+        }
+
+
+        /* Case 4: Two children */
+
+        successor = findMinNode((*node).right);
+
+        (*node).data = (*successor).data;
+
+        (*node).right =
+            deleteNodeRecursive(
+                (*node).right,
+                &(*successor).data);
     }
+
+    return node;
 }
 
-
-/* =========================
-   DELETE NODE
-   ========================= */
 
 void deleteNode(unsigned int *data)
 {
-    struct TreeNode *target;
-    struct TreeNode *deepest;
-
-    target = findNode(root, data);
-
-    if (target == NULL)
+    if (findNode(root, data) == NULL)
     {
         printf("Node not found!\n");
         return;
     }
 
-    deepest = findDeepestNode();
+    root = deleteNodeRecursive(root, data);
 
-    if (target == deepest)
+    printf("Node deleted successfully.\n");
+}
+
+
+/* =========================
+   UPDATE NODE
+   ========================= */
+
+void updateNode(
+    unsigned int *oldData,
+    unsigned int *newData)
+{
+    if (findNode(root, oldData) == NULL)
     {
-        deleteDeepestNode(deepest);
-        printf("Node deleted successfully.\n");
+        printf("Old node not found!\n");
         return;
     }
 
-    (*target).data = (*deepest).data;
+    if (*oldData == *newData)
+    {
+        printf("Old and new values are same.\n");
+        return;
+    }
 
-    deleteDeepestNode(deepest);
+    if (findNode(root, newData) != NULL)
+    {
+        printf("New value already exists!\n");
+        return;
+    }
 
-    printf("Node deleted successfully.\n");
+    /*
+       We cannot directly change the value
+       because it may violate the BST property.
+
+       Therefore:
+       1. Delete old value
+       2. Insert new value
+    */
+
+    root = deleteNodeRecursive(root, oldData);
+
+    addNode(newData);
+
+    printf("Node updated successfully.\n");
 }
 
 
@@ -512,7 +529,7 @@ int main()
     while (1)
     {
         printf("\n==============================\n");
-        printf("       BINARY TREE MENU\n");
+        printf("     BINARY SEARCH TREE MENU\n");
         printf("==============================\n");
 
         printf("1. Add Node\n");
@@ -525,6 +542,7 @@ int main()
         printf("==============================\n");
 
         printf("Enter your choice: ");
+
         gets(input);
 
         inputPtr = input;
