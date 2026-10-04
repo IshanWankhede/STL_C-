@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
+#include <errno.h>
 
-struct TreeNode {
+struct TreeNode
+{
     unsigned int data;
     struct TreeNode *left;
     struct TreeNode *right;
@@ -12,395 +15,807 @@ struct TreeNode {
 struct TreeNode *root = NULL;
 
 struct TreeNode *queue[100];
+
 int front = 0;
 int rear = 0;
 
-void resetQueue() {
-    front = 0;
-    rear = 0;
-}
 
-int isQueueEmpty() {
-    return front == rear;
-}
+/* =========================
+   INPUT VALIDATION
+   ========================= */
 
-int isQueueFull() {
-    return rear == 100;
-}
-
-void enqueue(struct TreeNode *node) {
-    if (isQueueFull()) {
-        printf("Queue is full!\n");
-        return;
-    }
-
-    queue[rear] = node;
-    rear++;
-}
-
-struct TreeNode *dequeue() {
-    if (isQueueEmpty()) {
-        return NULL;
-    }
-
-    struct TreeNode *node = queue[front];
-    front++;
-
-    return node;
-}
-
-int isNumber(char str[]) {
-    int i = 0;
-
-    if (str[0] == '\0') {
+int isNumber(const char **str)
+{
+    if (**str == '\0')
+    {
         return 0;
     }
 
-    while (str[i] != '\0') {
-        if (!isdigit((unsigned char)str[i])) {
+    while (**str)
+    {
+        if (!isdigit((unsigned char)**str))
+        {
             return 0;
         }
 
-        i++;
+        (*str)++;
     }
 
     return 1;
 }
 
-unsigned int getUnsignedInt(char message[]) {
+
+int isValidUnsignedInt(const char **str)
+{
+    char *endPtr;
+    unsigned long value;
+
+    const char *start = *str;
+    const char *scan = *str;
+
+    if (*start == '\0')
+    {
+        return 0;
+    }
+
+    if (!isNumber(&scan))
+    {
+        return 0;
+    }
+
+    errno = 0;
+
+    value = strtoul(start, &endPtr, 10);
+
+    if (errno == ERANGE || value > UINT_MAX)
+    {
+        return 0;
+    }
+
+    if (*endPtr != '\0')
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
+
+unsigned int getUnsignedInt(const char **message)
+{
     char input[100];
+    const char *inputPtr;
 
-    while (1) {
-        printf("%s", message);
+    while (1)
+    {
+        printf("%s", *message);
 
-        fgets(input, sizeof(input), stdin);
+        if (fgets(input, sizeof(input), stdin) == NULL)
+        {
+            exit(1);
+        }
 
         input[strcspn(input, "\n")] = '\0';
 
-        if (isNumber(input)) {
+        inputPtr = input;
+
+        if (isValidUnsignedInt(&inputPtr))
+        {
             return (unsigned int)strtoul(input, NULL, 10);
         }
 
-        printf("Invalid input! Please enter a positive number.\n");
+        printf(
+            "Invalid input! Please enter a valid unsigned integer.\n"
+        );
     }
 }
 
-struct TreeNode *createNode(unsigned int data) {
+
+/* =========================
+   QUEUE
+   ========================= */
+
+void resetQueue()
+{
+    front = 0;
+    rear = 0;
+}
+
+
+int isQueueEmpty()
+{
+    return front == rear;
+}
+
+
+int isQueueFull()
+{
+    return rear == 100;
+}
+
+
+void enqueue(struct TreeNode **node)
+{
+    if (isQueueFull())
+    {
+        printf("Queue is full!\n");
+        return;
+    }
+
+    queue[rear] = *node;
+    rear++;
+}
+
+
+struct TreeNode *dequeue()
+{
+    struct TreeNode *node;
+
+    if (isQueueEmpty())
+    {
+        return NULL;
+    }
+
+    node = queue[front];
+
+    front++;
+
+    return node;
+}
+
+
+/* =========================
+   CREATE NODE
+   ========================= */
+
+struct TreeNode *createNode(unsigned int *data)
+{
     struct TreeNode *newNode;
 
-    newNode = (struct TreeNode *)malloc(sizeof(struct TreeNode));
+    newNode =
+        (struct TreeNode *)malloc(
+            sizeof(struct TreeNode)
+        );
 
-    if (newNode == NULL) {
-        printf("Memory allocation failed!\n");
+    if (newNode == NULL)
+    {
+        printf("Memory Allocation Failed.\n");
         exit(1);
     }
 
-    newNode->data = data;
-    newNode->left = NULL;
-    newNode->right = NULL;
+    (*newNode).data = *data;
+    (*newNode).left = NULL;
+    (*newNode).right = NULL;
 
     return newNode;
 }
 
-struct TreeNode *findNode(struct TreeNode *node, unsigned int data) {
-    if (node == NULL) {
+
+/* =========================
+   SEARCH
+   ========================= */
+
+struct TreeNode *findNode(
+    struct TreeNode **node,
+    unsigned int *data)
+{
+    struct TreeNode *found;
+
+    if (*node == NULL)
+    {
         return NULL;
     }
 
-    if (node->data == data) {
-        return node;
+    if ((**node).data == *data)
+    {
+        return *node;
     }
 
-    struct TreeNode *found;
+    found =
+        findNode(
+            &((**node).left),
+            data
+        );
 
-    found = findNode(node->left, data);
-
-    if (found != NULL) {
+    if (found != NULL)
+    {
         return found;
     }
 
-    return findNode(node->right, data);
+    return findNode(
+        &((**node).right),
+        data
+    );
 }
 
-void addNode(unsigned int data) {
-    struct TreeNode *newNode = createNode(data);
 
-    if (root == NULL) {
+/* =========================
+   ADD NODE
+   ========================= */
+
+void addNode(unsigned int *data)
+{
+    struct TreeNode *newNode;
+    struct TreeNode *current;
+
+    newNode = createNode(data);
+
+    if (root == NULL)
+    {
         root = newNode;
 
-        printf("Node %u added successfully!\n", data);
+        printf(
+            "Node %u added successfully!\n",
+            *data
+        );
 
         return;
     }
 
     resetQueue();
 
-    enqueue(root);
+    enqueue(&root);
 
-    while (!isQueueEmpty()) {
-        struct TreeNode *current = dequeue();
+    while (!isQueueEmpty())
+    {
+        current = dequeue();
 
-        if (current->left == NULL) {
-            current->left = newNode;
+        if ((*current).left == NULL)
+        {
+            (*current).left = newNode;
 
-            printf("Node %u added successfully!\n", data);
-
-            return;
-        }
-
-        enqueue(current->left);
-
-        if (current->right == NULL) {
-            current->right = newNode;
-
-            printf("Node %u added successfully!\n", data);
+            printf(
+                "Node %u added successfully!\n",
+                *data
+            );
 
             return;
         }
 
-        enqueue(current->right);
+        enqueue(&((*current).left));
+
+        if ((*current).right == NULL)
+        {
+            (*current).right = newNode;
+
+            printf(
+                "Node %u added successfully!\n",
+                *data
+            );
+
+            return;
+        }
+
+        enqueue(&((*current).right));
     }
 }
 
-void preorder(struct TreeNode *node) {
-    if (node == NULL) {
+
+/* =========================
+   PREORDER
+   ========================= */
+
+void preorder(struct TreeNode **node)
+{
+    if (*node == NULL)
+    {
         return;
     }
-
-    printf("%u ", node->data);
-
-    preorder(node->left);
-    preorder(node->right);
-}
-
-void inorder(struct TreeNode *node) {
-    if (node == NULL) {
-        return;
-    }
-
-    inorder(node->left);
-
-    printf("%u ", node->data);
-
-    inorder(node->right);
-}
-
-void postorder(struct TreeNode *node) {
-    if (node == NULL) {
-        return;
-    }
-
-    postorder(node->left);
-    postorder(node->right);
-
-    printf("%u ", node->data);
-}
-
-void updateNode(unsigned int oldData, unsigned int newData) {
-    struct TreeNode *node;
-
-    node = findNode(root, oldData);
-
-    if (node == NULL) {
-        printf("Node %u not found!\n", oldData);
-        return;
-    }
-
-    node->data = newData;
 
     printf(
-        "Node %u updated to %u successfully!\n",
-        oldData,
-        newData
+        "%u ",
+        (**node).data
+    );
+
+    preorder(
+        &((**node).left)
+    );
+
+    preorder(
+        &((**node).right)
     );
 }
 
-struct TreeNode *findDeepestNode() {
+
+/* =========================
+   INORDER
+   ========================= */
+
+void inorder(struct TreeNode **node)
+{
+    if (*node == NULL)
+    {
+        return;
+    }
+
+    inorder(
+        &((**node).left)
+    );
+
+    printf(
+        "%u ",
+        (**node).data
+    );
+
+    inorder(
+        &((**node).right)
+    );
+}
+
+
+/* =========================
+   POSTORDER
+   ========================= */
+
+void postorder(struct TreeNode **node)
+{
+    if (*node == NULL)
+    {
+        return;
+    }
+
+    postorder(
+        &((**node).left)
+    );
+
+    postorder(
+        &((**node).right)
+    );
+
+    printf(
+        "%u ",
+        (**node).data
+    );
+}
+
+
+/* =========================
+   LEVEL ORDER
+   ========================= */
+
+void levelOrder()
+{
+    struct TreeNode *current;
+
+    if (root == NULL)
+    {
+        return;
+    }
+
+    resetQueue();
+
+    enqueue(&root);
+
+    while (!isQueueEmpty())
+    {
+        current = dequeue();
+
+        printf(
+            "%u ",
+            (*current).data
+        );
+
+        if ((*current).left != NULL)
+        {
+            enqueue(
+                &((*current).left)
+            );
+        }
+
+        if ((*current).right != NULL)
+        {
+            enqueue(
+                &((*current).right)
+            );
+        }
+    }
+}
+
+
+/* =========================
+   UPDATE NODE
+   ========================= */
+
+void updateNode(
+    unsigned int *oldData,
+    unsigned int *newData)
+{
+    struct TreeNode *node;
+
+    node =
+        findNode(
+            &root,
+            oldData
+        );
+
+    if (node == NULL)
+    {
+        printf(
+            "Node %u not found!\n",
+            *oldData
+        );
+
+        return;
+    }
+
+    (*node).data = *newData;
+
+    printf(
+        "Node %u updated to %u successfully!\n",
+        *oldData,
+        *newData
+    );
+}
+
+
+/* =========================
+   FIND DEEPEST NODE
+   ========================= */
+
+struct TreeNode *findDeepestNode()
+{
     struct TreeNode *current = NULL;
 
     resetQueue();
 
-    enqueue(root);
+    enqueue(&root);
 
-    while (!isQueueEmpty()) {
+    while (!isQueueEmpty())
+    {
         current = dequeue();
 
-        if (current->left != NULL) {
-            enqueue(current->left);
+        if ((*current).left != NULL)
+        {
+            enqueue(
+                &((*current).left)
+            );
         }
 
-        if (current->right != NULL) {
-            enqueue(current->right);
+        if ((*current).right != NULL)
+        {
+            enqueue(
+                &((*current).right)
+            );
         }
     }
 
     return current;
 }
 
-void deleteDeepestNode(struct TreeNode *deepest) {
+
+/* =========================
+   DELETE DEEPEST NODE
+   ========================= */
+
+void deleteDeepestNode(
+    struct TreeNode **deepest)
+{
     struct TreeNode *current;
 
-    if (root == NULL || deepest == NULL) {
+    if (root == NULL || *deepest == NULL)
+    {
         return;
     }
 
     resetQueue();
 
-    enqueue(root);
+    enqueue(&root);
 
-    while (!isQueueEmpty()) {
+    while (!isQueueEmpty())
+    {
         current = dequeue();
 
-        if (current->left != NULL) {
-            if (current->left == deepest) {
-                current->left = NULL;
+        if ((*current).left != NULL)
+        {
+            if ((*current).left == *deepest)
+            {
+                (*current).left = NULL;
 
-                free(deepest);
+                free(*deepest);
 
                 return;
             }
 
-            enqueue(current->left);
+            enqueue(
+                &((*current).left)
+            );
         }
 
-        if (current->right != NULL) {
-            if (current->right == deepest) {
-                current->right = NULL;
+        if ((*current).right != NULL)
+        {
+            if ((*current).right == *deepest)
+            {
+                (*current).right = NULL;
 
-                free(deepest);
+                free(*deepest);
 
                 return;
             }
 
-            enqueue(current->right);
+            enqueue(
+                &((*current).right)
+            );
         }
     }
 }
 
-void deleteNode(unsigned int data) {
+
+/* =========================
+   DELETE NODE
+   ========================= */
+
+void deleteNode(unsigned int *data)
+{
     struct TreeNode *target;
     struct TreeNode *deepest;
 
-    if (root == NULL) {
+    if (root == NULL)
+    {
         printf("Tree is empty!\n");
         return;
     }
 
-    target = findNode(root, data);
+    target =
+        findNode(
+            &root,
+            data
+        );
 
-    if (target == NULL) {
-        printf("Node %u not found!\n", data);
+    if (target == NULL)
+    {
+        printf(
+            "Node %u not found!\n",
+            *data
+        );
+
         return;
     }
 
-    if (root->left == NULL && root->right == NULL) {
+    if ((*root).left == NULL &&
+        (*root).right == NULL)
+    {
         free(root);
 
         root = NULL;
 
-        printf("Node %u deleted successfully!\n", data);
+        printf(
+            "Node %u deleted successfully!\n",
+            *data
+        );
 
         return;
     }
 
-    deepest = findDeepestNode();
+    deepest =
+        findDeepestNode();
 
-    target->data = deepest->data;
+    (*target).data =
+        (*deepest).data;
 
-    deleteDeepestNode(deepest);
+    deleteDeepestNode(
+        &deepest
+    );
 
-    printf("Node %u deleted successfully!\n", data);
+    printf(
+        "Node %u deleted successfully!\n",
+        *data
+    );
 }
 
-void displayTree() {
-    if (root == NULL) {
+
+/* =========================
+   DISPLAY
+   ========================= */
+
+void displayTree()
+{
+    if (root == NULL)
+    {
         printf("\nTree is empty!\n");
         return;
     }
 
-    printf("\nPreorder : ");
-    preorder(root);
+    printf("\nPreorder    : ");
+    preorder(&root);
 
-    printf("\nInorder  : ");
-    inorder(root);
+    printf("\nInorder     : ");
+    inorder(&root);
 
-    printf("\nPostorder: ");
-    postorder(root);
+    printf("\nPostorder   : ");
+    postorder(&root);
+
+    printf("\nLevel Order : ");
+    levelOrder();
 
     printf("\n");
 }
 
-void freeTree(struct TreeNode *node) {
-    if (node == NULL) {
+
+/* =========================
+   FREE TREE
+   ========================= */
+
+void freeTree(struct TreeNode **node)
+{
+    if (*node == NULL)
+    {
         return;
     }
 
-    freeTree(node->left);
-    freeTree(node->right);
+    freeTree(
+        &((**node).left)
+    );
 
-    free(node);
+    freeTree(
+        &((**node).right)
+    );
+
+    free(*node);
+
+    *node = NULL;
 }
 
-int main() {
+
+/* =========================
+   MAIN
+   ========================= */
+
+int main()
+{
+    char input[100];
+
+    const char *inputPtr;
+
     unsigned int choice;
     unsigned int data;
     unsigned int oldData;
     unsigned int newData;
 
-    while (1) {
+    while (1)
+    {
         printf("\n");
+
         printf("=================================\n");
         printf("       BINARY TREE MENU\n");
         printf("=================================\n");
+
         printf("1. Add Node\n");
         printf("2. Display Traversals\n");
         printf("3. Search Node\n");
         printf("4. Update Node\n");
         printf("5. Delete Node\n");
         printf("6. Exit\n");
+
         printf("=================================\n");
 
-        choice = getUnsignedInt("Enter your choice: ");
+        printf("Enter your choice: ");
 
-        if (choice == 1) {
-            data = getUnsignedInt("Enter data to add: ");
-            addNode(data);
-        }
-        else if (choice == 2) {
-            displayTree();
-        }
-        else if (choice == 3) {
-            data = getUnsignedInt("Enter data to search: ");
-
-            if (findNode(root, data) != NULL) {
-                printf("Node %u found in the tree!\n", data);
-            }
-            else {
-                printf("Node %u not found!\n", data);
-            }
-        }
-        else if (choice == 4) {
-            oldData = getUnsignedInt("Enter old value: ");
-            newData = getUnsignedInt("Enter new value: ");
-
-            updateNode(oldData, newData);
-        }
-        else if (choice == 5) {
-            data = getUnsignedInt("Enter data to delete: ");
-
-            deleteNode(data);
-        }
-        else if (choice == 6) {
-            freeTree(root);
-
-            root = NULL;
-
-            printf("\nProgram exited successfully!\n");
-
+        if (fgets(input, sizeof(input), stdin) == NULL)
+        {
             break;
         }
-        else {
-            printf("Invalid choice! Please select 1-6.\n");
+
+        input[strcspn(input, "\n")] = '\0';
+
+        inputPtr = input;
+
+        if (!isValidUnsignedInt(&inputPtr))
+        {
+            printf(
+                "Invalid input! Please enter a valid number.\n"
+            );
+
+            continue;
+        }
+
+        choice =
+            (unsigned int)strtoul(
+                input,
+                NULL,
+                10
+            );
+
+        switch (choice)
+        {
+            case 1:
+
+                data =
+                    getUnsignedInt(
+                        "Enter data to add: "
+                    );
+
+                addNode(&data);
+
+                break;
+
+
+            case 2:
+
+                displayTree();
+
+                break;
+
+
+            case 3:
+
+                data =
+                    getUnsignedInt(
+                        "Enter data to search: "
+                    );
+
+                if (findNode(
+                        &root,
+                        &data
+                    ) != NULL)
+                {
+                    printf(
+                        "Node %u found in the tree!\n",
+                        data
+                    );
+                }
+                else
+                {
+                    printf(
+                        "Node %u not found!\n",
+                        data
+                    );
+                }
+
+                break;
+
+
+            case 4:
+
+                oldData =
+                    getUnsignedInt(
+                        "Enter old value: "
+                    );
+
+                newData =
+                    getUnsignedInt(
+                        "Enter new value: "
+                    );
+
+                updateNode(
+                    &oldData,
+                    &newData
+                );
+
+                break;
+
+
+            case 5:
+
+                data =
+                    getUnsignedInt(
+                        "Enter data to delete: "
+                    );
+
+                deleteNode(&data);
+
+                break;
+
+
+            case 6:
+
+                freeTree(&root);
+
+                printf(
+                    "\nTree Freed From Memory.\n"
+                );
+
+                printf(
+                    "Program exited successfully!\n"
+                );
+
+                return 0;
+
+
+            default:
+
+                printf(
+                    "Invalid Choice! Please select 1-6.\n"
+                );
         }
     }
 
