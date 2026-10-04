@@ -45,20 +45,22 @@ int isValidUnsignedInt(const char **str)
 {
     char *endPtr;
     unsigned long value;
+    const char *start = *str;
+    const char *scan = *str;
 
-    if (**str == '\0')
+    if (*start == '\0')
     {
         return 0;
     }
 
-    if (!isNumber(str))
+    if (!isNumber(&scan))
     {
         return 0;
     }
 
     errno = 0;
 
-    value = strtoul(*str, &endPtr, 10);
+    value = strtoul(start, &endPtr, 10);
 
     if (errno == ERANGE || value > UINT_MAX)
     {
@@ -77,6 +79,7 @@ int isValidUnsignedInt(const char **str)
 unsigned int getUnsignedInt(const char *message)
 {
     char input[100];
+    const char *inputPtr = input;
 
     while (1)
     {
@@ -84,7 +87,7 @@ unsigned int getUnsignedInt(const char *message)
 
         gets(input);
 
-        if (isValidUnsignedInt(&input))
+        if (isValidUnsignedInt(&inputPtr))
         {
             return (unsigned int)strtoul(input, NULL, 10);
         }
@@ -468,6 +471,7 @@ void freeTree(struct TreeNode **node)
 int main()
 {
     char input[100];
+    const char *inputPtr = input;
 
     unsigned int choice;
     unsigned int data;
@@ -492,7 +496,7 @@ int main()
 
         gets(input);
 
-        if (!isValidUnsignedInt(&input))
+        if (!isValidUnsignedInt(&inputPtr))
         {
             printf("Invalid input! Please enter a valid number.\n");
 
