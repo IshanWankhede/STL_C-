@@ -18,10 +18,7 @@ struct TreeNode *queue[100];
 int front = 0;
 int rear = 0;
 
-
-/* =========================
-   INPUT VALIDATION
-   ========================= */
+//   INPUT VALIDATION
 
 int isNumber(const char **str)
 {
@@ -91,10 +88,7 @@ unsigned int getUnsignedInt(const char **message)
     }
 }
 
-
-/* =========================
-   QUEUE FUNCTIONS
-   ========================= */
+//   QUEUE FUNCTIONS
 
 void resetQueue()
 {
@@ -135,10 +129,7 @@ struct TreeNode *dequeue()
     return queue[front++];
 }
 
-
-/* =========================
-   CREATE NODE
-   ========================= */
+//   CREATE NODE
 
 struct TreeNode *createNode(unsigned int *data)
 {
@@ -159,10 +150,7 @@ struct TreeNode *createNode(unsigned int *data)
     return newNode;
 }
 
-
-/* =========================
-   BST INSERTION
-   ========================= */
+//   BST INSERTION
 
 void addNode(unsigned int *data)
 {
@@ -225,10 +213,7 @@ void addNode(unsigned int *data)
     }
 }
 
-
-/* =========================
-   BST SEARCH
-   ========================= */
+//   BST SEARCH
 
 struct TreeNode *findNode(
     struct TreeNode *node,
@@ -246,10 +231,7 @@ struct TreeNode *findNode(
     return findNode((*node).right, data);
 }
 
-
-/* =========================
-   TRAVERSALS
-   ========================= */
+//   TRAVERSALS
 
 void preorder(struct TreeNode *node)
 {
@@ -287,10 +269,7 @@ void postorder(struct TreeNode *node)
     printf("%u ", (*node).data);
 }
 
-
-/* =========================
-   LEVEL ORDER TRAVERSAL
-   ========================= */
+//   LEVEL ORDER TRAVERSAL
 
 void levelOrder()
 {
@@ -317,10 +296,7 @@ void levelOrder()
     }
 }
 
-
-/* =========================
-   DISPLAY TREE
-   ========================= */
+//   DISPLAY TREE
 
 void displayTree()
 {
@@ -345,10 +321,8 @@ void displayTree()
     printf("\n");
 }
 
+//   FIND MINIMUM NODE
 
-/* =========================
-   FIND MINIMUM NODE
-   ========================= */
 
 struct TreeNode *findMinNode(struct TreeNode *node)
 {
@@ -363,9 +337,9 @@ struct TreeNode *findMinNode(struct TreeNode *node)
 }
 
 
-/* =========================
-   BST DELETE
-   ========================= */
+
+//   BST DELETE
+
 
 struct TreeNode *deleteNodeRecursive(
     struct TreeNode *node,
@@ -453,9 +427,8 @@ void deleteNode(unsigned int *data)
 }
 
 
-/* =========================
-   UPDATE NODE
-   ========================= */
+//   UPDATE NODE
+
 
 void updateNode(
     unsigned int *oldData,
@@ -496,9 +469,8 @@ void updateNode(
 }
 
 
-/* =========================
-   FREE TREE
-   ========================= */
+//   FREE TREE
+
 
 void freeTree(struct TreeNode *node)
 {
@@ -512,9 +484,8 @@ void freeTree(struct TreeNode *node)
 }
 
 
-/* =========================
-   MAIN
-   ========================= */
+
+//   MAIN
 
 int main()
 {
