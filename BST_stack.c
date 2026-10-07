@@ -18,6 +18,10 @@ struct TreeNode *queue[100];
 int front = 0;
 int rear = 0;
 
+struct TreeNode *stack[100];
+int top = -1;
+
+
 //   INPUT VALIDATION
 
 int isNumber(const char *str)
@@ -88,6 +92,7 @@ unsigned int getUnsignedInt(const char *message)
     }
 }
 
+
 //   QUEUE FUNCTIONS
 
 void resetQueue()
@@ -129,6 +134,48 @@ struct TreeNode *dequeue()
     return queue[front++];
 }
 
+
+//   STACK FUNCTIONS
+
+void resetStack()
+{
+    top = -1;
+}
+
+
+int isStackEmpty()
+{
+    return top == -1;
+}
+
+
+int isStackFull()
+{
+    return top == 99;
+}
+
+
+void push(struct TreeNode *node)
+{
+    if (isStackFull())
+    {
+        printf("Stack is full!\n");
+        return;
+    }
+
+    stack[++top] = node;
+}
+
+
+struct TreeNode *pop()
+{
+    if (isStackEmpty())
+        return NULL;
+
+    return stack[top--];
+}
+
+
 //   CREATE NODE
 
 struct TreeNode *createNode(unsigned int *data)
@@ -149,6 +196,7 @@ struct TreeNode *createNode(unsigned int *data)
 
     return newNode;
 }
+
 
 //   BST INSERTION
 
@@ -213,6 +261,7 @@ void addNode(unsigned int *data)
     }
 }
 
+
 //   BST SEARCH
 
 struct TreeNode *findNode(
@@ -231,43 +280,104 @@ struct TreeNode *findNode(
     return findNode((*node).right, data);
 }
 
-//   TRAVERSALS
+
+//   PREORDER TRAVERSAL USING STACK
 
 void preorder(struct TreeNode *node)
 {
+    struct TreeNode *current;
+
     if (node == NULL)
         return;
 
-    printf("%u ", (*node).data);
+    resetStack();
 
-    preorder((*node).left);
-    preorder((*node).right);
+    push(node);
+
+    while (!isStackEmpty())
+    {
+        current = pop();
+
+        printf("%u ", (*current).data);
+
+        if ((*current).right != NULL)
+            push((*current).right);
+
+        if ((*current).left != NULL)
+            push((*current).left);
+    }
 }
 
+
+//   INORDER TRAVERSAL USING STACK
 
 void inorder(struct TreeNode *node)
 {
-    if (node == NULL)
-        return;
+    struct TreeNode *current;
 
-    inorder((*node).left);
+    current = node;
 
-    printf("%u ", (*node).data);
+    resetStack();
 
-    inorder((*node).right);
+    while (current != NULL || !isStackEmpty())
+    {
+        while (current != NULL)
+        {
+            push(current);
+
+            current = (*current).left;
+        }
+
+        current = pop();
+
+        printf("%u ", (*current).data);
+
+        current = (*current).right;
+    }
 }
 
+
+//   POSTORDER TRAVERSAL USING STACK
 
 void postorder(struct TreeNode *node)
 {
-    if (node == NULL)
-        return;
+    struct TreeNode *current;
+    struct TreeNode *previous;
 
-    postorder((*node).left);
-    postorder((*node).right);
+    current = node;
+    previous = NULL;
 
-    printf("%u ", (*node).data);
+    resetStack();
+
+    while (current != NULL || !isStackEmpty())
+    {
+        while (current != NULL)
+        {
+            push(current);
+
+            current = (*current).left;
+        }
+
+        current = stack[top];
+
+        if ((*current).right != NULL &&
+            previous != (*current).right)
+        {
+            current = (*current).right;
+        }
+        else
+        {
+            printf("%u ", (*current).data);
+
+            previous = current;
+
+            pop();
+
+            current = NULL;
+        }
+    }
 }
+
 
 //   LEVEL ORDER TRAVERSAL
 
@@ -296,6 +406,7 @@ void levelOrder()
     }
 }
 
+
 //   DISPLAY TREE
 
 void displayTree()
@@ -321,8 +432,8 @@ void displayTree()
     printf("\n");
 }
 
-//   FIND MINIMUM NODE
 
+//   FIND MINIMUM NODE
 
 struct TreeNode *findMinNode(struct TreeNode *node)
 {
@@ -337,9 +448,7 @@ struct TreeNode *findMinNode(struct TreeNode *node)
 }
 
 
-
 //   BST DELETE
-
 
 struct TreeNode *deleteNodeRecursive(
     struct TreeNode *node,
@@ -362,7 +471,7 @@ struct TreeNode *deleteNodeRecursive(
     }
     else
     {
-        /* Case 1: No child */
+        // Case 1: No child
 
         if ((*node).left == NULL &&
             (*node).right == NULL)
@@ -372,8 +481,7 @@ struct TreeNode *deleteNodeRecursive(
             return NULL;
         }
 
-
-        /* Case 2: Only right child */
+        // Case 2: Only right child
 
         if ((*node).left == NULL)
         {
@@ -384,8 +492,7 @@ struct TreeNode *deleteNodeRecursive(
             return temp;
         }
 
-
-        /* Case 3: Only left child */
+        // Case 3: Only left child
 
         if ((*node).right == NULL)
         {
@@ -396,8 +503,7 @@ struct TreeNode *deleteNodeRecursive(
             return temp;
         }
 
-
-        /* Case 4: Two children */
+        // Case 4: Two children
 
         successor = findMinNode((*node).right);
 
@@ -429,7 +535,6 @@ void deleteNode(unsigned int *data)
 
 //   UPDATE NODE
 
-
 void updateNode(
     unsigned int *oldData,
     unsigned int *newData)
@@ -452,14 +557,8 @@ void updateNode(
         return;
     }
 
-    /*
-       We cannot directly change the value
-       because it may violate the BST property.
-
-       Therefore:
-       1. Delete old value
-       2. Insert new value
-    */
+    // We cannot directly change the value because it may violate the BST property.
+    // Therefore delete old value and insert new value.
 
     root = deleteNodeRecursive(root, oldData);
 
@@ -471,7 +570,6 @@ void updateNode(
 
 //   FREE TREE
 
-
 void freeTree(struct TreeNode *node)
 {
     if (node == NULL)
@@ -482,7 +580,6 @@ void freeTree(struct TreeNode *node)
 
     free(node);
 }
-
 
 
 //   MAIN

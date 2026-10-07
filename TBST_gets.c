@@ -15,43 +15,39 @@ struct TreeNode
 
 struct TreeNode *root = NULL;
 
+// INPUT VALIDATION
 
-/* =========================
-   INPUT VALIDATION
-   ========================= */
-
-int isNumber(const char **str)
+int isNumber(const char *str)
 {
-    if (**str == '\0')
+    if (*str == '\0')
         return 0;
 
-    while (**str != '\0')
+    while (*str != '\0')
     {
-        if (!isdigit((unsigned char)**str))
+        if (!isdigit((unsigned char)*str))
             return 0;
 
-        (*str)++;
+        str++;
     }
 
     return 1;
 }
 
-
-int isValidUnsignedInt(const char **str)
+int isValidUnsignedInt(const char *str)
 {
-    const char *temp = *str;
+    const char *temp = str;
     char *endptr;
     unsigned long value;
 
     while (isspace((unsigned char)*temp))
         temp++;
 
-    if (!isNumber(&temp))
+    if (!isNumber(temp))
         return 0;
 
     errno = 0;
 
-    value = strtoul(*str, &endptr, 10);
+    value = strtoul(str, &endptr, 10);
 
     while (isspace((unsigned char)*endptr))
         endptr++;
@@ -65,51 +61,42 @@ int isValidUnsignedInt(const char **str)
     return 1;
 }
 
-
-unsigned int getUnsignedInt(const char **message)
+unsigned int getUnsignedInt(const char *message)
 {
     char input[100];
     const char *inputPtr = input;
 
     while (1)
     {
-        printf("%s", *message);
+        printf("%s", message);
 
         gets(input);
 
-        /*
-           Reset pointer every time because
-           validation advances the pointer.
-        */
+        // Reset pointer every time because
+        // validation advances the pointer.
         inputPtr = input;
 
-        if (isValidUnsignedInt(&inputPtr))
+        if (isValidUnsignedInt(inputPtr))
         {
             return (unsigned int)strtoul(
                 input,
                 NULL,
-                10
-            );
+                10);
         }
 
         printf(
-            "Invalid input! Please enter a valid unsigned integer.\n"
-        );
+            "Invalid input! Please enter a valid unsigned integer.\n");
     }
 }
 
-
-/* =========================
-   CREATE NODE
-   ========================= */
+// CREATE NODE
 
 struct TreeNode *createNode(unsigned int *data)
 {
     struct TreeNode *newNode;
 
     newNode = (struct TreeNode *)malloc(
-        sizeof(struct TreeNode)
-    );
+        sizeof(struct TreeNode));
 
     if (newNode == NULL)
     {
@@ -123,19 +110,14 @@ struct TreeNode *createNode(unsigned int *data)
 
     (*newNode).right = NULL;
 
-    /*
-       1 = right pointer is a thread
-       0 = right pointer is a real child
-    */
+    // 1 = right pointer is a thread
+    // 0 = right pointer is a real child
     (*newNode).rightThread = 1;
 
     return newNode;
 }
 
-
-/* =========================
-   FIND INORDER SUCCESSOR
-   ========================= */
+// FIND INORDER SUCCESSOR
 
 struct TreeNode *inorderSuccessor(
     struct TreeNode *node)
@@ -159,10 +141,7 @@ struct TreeNode *inorderSuccessor(
     return current;
 }
 
-
-/* =========================
-   FIND MINIMUM NODE
-   ========================= */
+// FIND MINIMUM NODE
 
 struct TreeNode *findMinNode()
 {
@@ -181,10 +160,7 @@ struct TreeNode *findMinNode()
     return current;
 }
 
-
-/* =========================
-   INSERT NODE
-   ========================= */
+// INSERT NODE
 
 void addNode(unsigned int *data)
 {
@@ -215,8 +191,7 @@ void addNode(unsigned int *data)
         if (*data == (*current).data)
         {
             printf(
-                "Duplicate value! Node not added.\n"
-            );
+                "Duplicate value! Node not added.\n");
 
             free(newNode);
 
@@ -239,16 +214,12 @@ void addNode(unsigned int *data)
         }
     }
 
-    /*
-       Insert as left child.
-    */
+    // Insert as left child.
     if (*data < (*parent).data)
     {
         (*newNode).left = NULL;
 
-        /*
-           Parent becomes inorder successor.
-        */
+        // Parent becomes inorder successor.
         (*newNode).right = parent;
 
         (*newNode).rightThread = 1;
@@ -256,34 +227,25 @@ void addNode(unsigned int *data)
         (*parent).left = newNode;
     }
 
-    /*
-       Insert as right child.
-    */
+    // Insert as right child.
     else
     {
-        /*
-           Parent's old thread becomes
-           new node's thread.
-        */
+        // Parent's old thread becomes
+        // new node's thread.
         (*newNode).right = (*parent).right;
 
         (*newNode).rightThread = 1;
 
         (*parent).right = newNode;
 
-        /*
-           Parent's right is now a real child.
-        */
+        // Parent's right is now a real child.
         (*parent).rightThread = 0;
     }
 
     printf("Node added successfully.\n");
 }
 
-
-/* =========================
-   SEARCH NODE
-   ========================= */
+// SEARCH NODE
 
 struct TreeNode *findNode(unsigned int *data)
 {
@@ -310,10 +272,7 @@ struct TreeNode *findNode(unsigned int *data)
     return NULL;
 }
 
-
-/* =========================
-   INORDER TRAVERSAL
-   ========================= */
+// INORDER TRAVERSAL
 
 void inorder()
 {
@@ -329,10 +288,7 @@ void inorder()
     }
 }
 
-
-/* =========================
-   PREORDER TRAVERSAL
-   ========================= */
+// PREORDER TRAVERSAL
 
 void preorder(struct TreeNode *node)
 {
@@ -351,10 +307,7 @@ void preorder(struct TreeNode *node)
     }
 }
 
-
-/* =========================
-   POSTORDER TRAVERSAL
-   ========================= */
+// POSTORDER TRAVERSAL
 
 void postorder(struct TreeNode *node)
 {
@@ -373,10 +326,7 @@ void postorder(struct TreeNode *node)
     printf("%u ", (*node).data);
 }
 
-
-/* =========================
-   LEVEL ORDER
-   ========================= */
+// LEVEL ORDER
 
 void levelOrder()
 {
@@ -403,10 +353,8 @@ void levelOrder()
             queue[rear++] = (*current).left;
         }
 
-        /*
-           IMPORTANT:
-           A thread is NOT a child.
-        */
+        // IMPORTANT:
+        // A thread is NOT a child.
         if ((*current).rightThread == 0 &&
             (*current).right != NULL)
         {
@@ -415,10 +363,7 @@ void levelOrder()
     }
 }
 
-
-/* =========================
-   DISPLAY TREE
-   ========================= */
+// DISPLAY TREE
 
 void displayTree()
 {
@@ -443,10 +388,7 @@ void displayTree()
     printf("\n");
 }
 
-
-/* =========================
-   UPDATE NODE
-   ========================= */
+// UPDATE NODE
 
 void updateNode(
     unsigned int *oldData,
@@ -472,14 +414,11 @@ void updateNode(
 
     printf(
         "For Threaded BST, use Delete followed by Add "
-        "to safely change a value.\n"
-    );
+        "to safely change a value.\n");
 }
 
+// DELETE NODE
 
-/* =========================
-   DELETE NODE
-   ========================= */
 
 void deleteNode(unsigned int *data)
 {
@@ -488,9 +427,8 @@ void deleteNode(unsigned int *data)
 
     current = root;
 
-    /*
-       Find node.
-    */
+    // Find node.
+
     while (current != NULL)
     {
         if (*data == (*current).data)
@@ -517,10 +455,8 @@ void deleteNode(unsigned int *data)
         return;
     }
 
+    // TWO CHILDREN
 
-    /*
-       TWO CHILDREN
-    */
     if ((*current).left != NULL &&
         (*current).rightThread == 0 &&
         (*current).right != NULL)
@@ -541,10 +477,8 @@ void deleteNode(unsigned int *data)
         parent = successorParent;
     }
 
+    // ONLY LEFT CHILD
 
-    /*
-       ONLY LEFT CHILD
-    */
     if ((*current).left != NULL &&
         (*current).rightThread == 1)
     {
@@ -565,9 +499,8 @@ void deleteNode(unsigned int *data)
             (*parent).rightThread = 0;
         }
 
-        /*
-           Find rightmost node in left subtree.
-        */
+        // Find rightmost node in left subtree.
+
         {
             struct TreeNode *rightmost = child;
 
@@ -577,9 +510,8 @@ void deleteNode(unsigned int *data)
                 rightmost = (*rightmost).right;
             }
 
-            /*
-               Connect thread to current's successor.
-            */
+            // onnect thread to current's successor.
+        
             (*rightmost).right =
                 (*current).right;
 
@@ -593,10 +525,8 @@ void deleteNode(unsigned int *data)
         return;
     }
 
+    // ONLY RIGHT CHILD
 
-    /*
-       ONLY RIGHT CHILD
-    */
     if ((*current).left == NULL &&
         (*current).rightThread == 0 &&
         (*current).right != NULL)
@@ -625,10 +555,8 @@ void deleteNode(unsigned int *data)
         return;
     }
 
+    // LEAF NODE
 
-    /*
-       LEAF NODE
-    */
     if ((*current).left == NULL &&
         (*current).rightThread == 1)
     {
@@ -642,9 +570,7 @@ void deleteNode(unsigned int *data)
         }
         else
         {
-            /*
-               Restore parent's thread.
-            */
+            // Restore parent's thread.
             (*parent).right =
                 (*current).right;
 
@@ -659,10 +585,7 @@ void deleteNode(unsigned int *data)
     }
 }
 
-
-/* =========================
-   FREE TREE
-   ========================= */
+// FREE TREE
 
 void freeTree(struct TreeNode *node)
 {
@@ -681,10 +604,7 @@ void freeTree(struct TreeNode *node)
     free(node);
 }
 
-
-/* =========================
-   MAIN
-   ========================= */
+// MAIN
 
 int main()
 {
@@ -718,7 +638,7 @@ int main()
 
         inputPtr = input;
 
-        if (!isValidUnsignedInt(&inputPtr))
+        if (!isValidUnsignedInt(inputPtr))
         {
             printf("Invalid choice!\n");
             continue;
@@ -728,98 +648,75 @@ int main()
             (unsigned int)strtoul(
                 input,
                 NULL,
-                10
-            );
+                10);
 
         switch (choice)
         {
-            case 1:
+        case 1:
 
-                data = getUnsignedInt(
-                    &(const char *){"Enter data: "}
-                );
+            data = getUnsignedInt(
+                "Enter data: ");
 
-                addNode(&data);
+            addNode(&data);
 
-                break;
+            break;
 
+        case 2:
 
-            case 2:
+            displayTree();
 
-                displayTree();
+            break;
 
-                break;
+        case 3:
 
+            data = getUnsignedInt(
+                "Enter data to search: ");
 
-            case 3:
+            if (findNode(&data) != NULL)
+                printf("Node found!\n");
+            else
+                printf("Node not found!\n");
 
-                data = getUnsignedInt(
-                    &(const char *){
-                        "Enter data to search: "
-                    }
-                );
+            break;
 
-                if (findNode(&data) != NULL)
-                    printf("Node found!\n");
-                else
-                    printf("Node not found!\n");
+        case 4:
 
-                break;
+            oldData = getUnsignedInt(
+                "Enter old data: ");
 
+            newData = getUnsignedInt(
+                "Enter new data: ");
 
-            case 4:
+            updateNode(
+                &oldData,
+                &newData);
 
-                oldData = getUnsignedInt(
-                    &(const char *){
-                        "Enter old data: "
-                    }
-                );
+            break;
 
-                newData = getUnsignedInt(
-                    &(const char *){
-                        "Enter new data: "
-                    }
-                );
+        case 5:
 
-                updateNode(
-                    &oldData,
-                    &newData
-                );
+            data = getUnsignedInt(
+                "Enter data to delete: ");
 
-                break;
+            deleteNode(&data);
 
+            break;
 
-            case 5:
+        case 6:
 
-                data = getUnsignedInt(
-                    &(const char *){
-                        "Enter data to delete: "
-                    }
-                );
+            freeTree(root);
 
-                deleteNode(&data);
+            root = NULL;
 
-                break;
+            printf(
+                "Program exited successfully.\n");
 
+            return 0;
 
-            case 6:
+        default:
 
-                freeTree(root);
-
-                root = NULL;
-
-                printf(
-                    "Program exited successfully.\n"
-                );
-
-                return 0;
-
-
-            default:
-
-                printf(
-                    "Invalid choice! Please select 1-6.\n"
-                );
+            printf(
+                "Invalid choice! Please select 1-6.\n");
         }
     }
 
